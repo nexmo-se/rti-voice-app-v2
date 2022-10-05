@@ -1,0 +1,6 @@
+.DS_Store
+.env
+**/node_modules
+rti-voice-app-v2-*
+private.key
+.private.key
