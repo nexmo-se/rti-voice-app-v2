@@ -1831,34 +1831,7 @@ app.post('/results', (req, res) => {
 
 });
 
-
 //=========================================
-
-app.use ('/', express.static(__dirname));
-
-app.get('/:name', function (req, res, next) {
-
-  let options = {
-    // root: __dirname + '/public/',
-    root: __dirname,
-    dotfiles: 'deny',
-    headers: {
-        'x-timestamp': Date.now(),
-        'x-sent': true
-    }
-  };
-
-  let fileName = req.params.name;
-  res.sendFile(fileName, options, function (err) {
-    if (err) {
-      next(err);
-    } else {
-      console.log('Sent:', fileName);
-    }
-  });
-});
-
-//-----------
 
 const port = process.env.PORT || 8000;
 
