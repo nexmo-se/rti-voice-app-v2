@@ -4,6 +4,14 @@
 
 require('dotenv').config();
 
+//--- for Neru installation ----
+
+const neruHost = process.env.NERU_HOST;
+console.log('neruHost:', neruHost);
+
+// const neruHost = process.env['NERU_HOST']
+// console.log('neruHost:', neruHost);
+
 const express = require('express');
 const bodyParser = require('body-parser')
 const app = express();
@@ -74,6 +82,9 @@ const vonage = new Vonage({
   applicationId: process.env.APP_ID,
   privateKey: './.private.key'
 });
+
+const key = process.env.API_KEY;
+console.log('key:', key);
 
 //------------
 
@@ -985,7 +996,7 @@ addToLangSetting (viVN);
 //   ];
 // addToLangSetting (cyGB);
 
-console.log ("Language settings:", langSetting);
+// console.log ("Language settings:", langSetting);
 
 //-------------------------------------------------------------
 
@@ -1224,7 +1235,17 @@ app.get('/makecall', (req, res) => {
 
   res.status(200).send('Ok');
 
-  const hostName = `${req.hostname}`;
+  console.log("in /makecall ....");
+
+  let hostName;
+
+  if (neruHost) {
+    hostName = neruHost;
+  } else {
+    hostName = `${req.hostname}`;
+  }
+
+  console.log("hostName:", hostName);
 
   let callInfo;
   let reqOptions;
@@ -1233,8 +1254,9 @@ app.get('/makecall', (req, res) => {
 
   callInfo = {
     'type': 'phone',
-    'number': '12095551212', // one the parties to call
-    'languageCode': 'es-US', // should be a different language from call 2 below
+    // 'number': '12095551212', // one the parties to call
+    'number': '14152365221', // one the parties to call
+    'languageCode': 'fr-FR', // should be a different language from call 2 below
     'userId': 'abcde', // try to have a unique ID for each participant
     'userName': 'myVBC', // may be empty
     'conferenceName': '22334699', // unique for each conference call, all digits for the use case here
@@ -1259,7 +1281,8 @@ app.get('/makecall', (req, res) => {
 
     callInfo = {
     'type': 'phone',
-    'number': '12095551313', // other party to call
+    // 'number': '12095551313', // other party to call
+    'number': '14087726269', // other party to call
     'languageCode': 'en-US', // should be a different language from call 1 above
     'userId': 'fghijk', // may be empty
     'userName': 'myCell', // may be empty
@@ -1289,7 +1312,17 @@ app.post('/placecall', (req, res) => {
 
   res.status(200).send('Ok');
 
-  const hostName = `${req.hostname}`;
+  console.log("in /placecall ....");
+
+  let hostName;
+
+  if (neruHost) {
+    hostName = neruHost;
+  } else {
+    hostName = `${req.hostname}`;
+  }
+
+  console.log("hostName:", hostName);
 
   const languageCode = req.body.languageCode;
   const userId = req.body.userId;
@@ -1401,7 +1434,7 @@ app.post('/placecall', (req, res) => {
         console.log("Unsupported call type:", type);
     }
 
-  };  
+  };
 
 });
 
@@ -1409,31 +1442,37 @@ app.post('/placecall', (req, res) => {
 
 app.get('/answer_lang', (req, res) => {
 
-    const hostName = `${req.hostname}`;
+  let hostName;
 
-    const languageCode = req.query.language_code;
-    const userId = req.query.user_id;
-    const userName = req.query.user_name;
-    const conferenceName = req.query.conference_name;
-    const conferencePin = req.query.conference_pin;  // future usage
+  if (neruHost) {
+    hostName = neruHost;
+  } else {
+    hostName = `${req.hostname}`;
+  }
 
-    // TBD set text in relevant message for announcement
+  const languageCode = req.query.language_code;
+  const userId = req.query.user_id;
+  const userName = req.query.user_name;
+  const conferenceName = req.query.conference_name;
+  const conferencePin = req.query.conference_pin;  // future usage
 
-    let nccoResponse = [
-        // {
-        //   "action":"talk",
-        //   "text": ....,
-        //   "style": ...,
-        // },
-        {
-          "action": "conversation",
-          "name": req.query.conference_name,
-          "startOnEnter": true,
-          "endOnExit": true // valid ONLY for 1-to-1 case (not for multi-party), so it ends any websockets still up and other leg
-        }
-      ];
+  // TBD set text in relevant message for announcement
 
-    res.status(200).json(nccoResponse);
+  let nccoResponse = [
+      // {
+      //   "action":"talk",
+      //   "text": ....,
+      //   "style": ...,
+      // },
+      {
+        "action": "conversation",
+        "name": req.query.conference_name,
+        "startOnEnter": true,
+        "endOnExit": true // valid ONLY for 1-to-1 case (not for multi-party), so it ends any websockets still up and other leg
+      }
+    ];
+
+  res.status(200).json(nccoResponse);
 });
 
 
@@ -1441,7 +1480,14 @@ app.get('/answer_lang', (req, res) => {
 
 app.post('/event_lang', (req, res) => {
 
-  const hostName = `${req.hostname}`;
+  let hostName;
+
+  if (neruHost) {
+    hostName = neruHost;
+  } else {
+    hostName = `${req.hostname}`;
+  }
+
   const uuid = req.body.uuid;
   const languageCode = req.query.language_code;
   const userId = req.query.user_id;
@@ -1568,7 +1614,13 @@ app.get('/answer', (req, res) => {
   
   app.set('call_type_' + uuid, notWebsocket);
 
-  const hostName = `${req.hostname}`;
+  let hostName;
+
+  if (neruHost) {
+    hostName = neruHost;
+  } else {
+    hostName = `${req.hostname}`;
+  }
 
   // check first that caller number is authorized
 
@@ -1627,7 +1679,14 @@ app.get('/answer', (req, res) => {
 
 app.post('/event', (req, res) => {
 
-  const hostName = `${req.hostname}`;
+  let hostName;
+
+  if (neruHost) {
+    hostName = neruHost;
+  } else {
+    hostName = `${req.hostname}`;
+  }
+
   const uuid = req.body.uuid;
 
   if (req.body.type == 'transfer'){
@@ -1831,9 +1890,16 @@ app.post('/results', (req, res) => {
 
 });
 
+//-------------------- for Neru --------
+
+app.get('/_/health', async (req, res) => {
+    res.sendStatus(200);
+});
+
 //=========================================
 
-const port = process.env.PORT || 8000;
+// const port = process.env.PORT || 8000;
+const port = process.env.NERU_APP_PORT || process.env.PORT || 8000;
 
 app.listen(port, () => console.log(`Server application listening on port ${port}!`));
 
